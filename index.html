@@ -29,20 +29,18 @@
   <canvas id="myChart" width="800" height="400"></canvas>
 
   <script>
-    const SHEET_ID = "1gGm5MgseZynjf2GatevmJTh04cUOVeCg8WyYdjlznIQ";
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Untitled%20spreadsheet`;
+    const url = "https://script.google.com/macros/s/AKfycbxxAt61qImUwpHNnv6nAcb-Dlse420bH0NTu7VhWXeLH36ArnfZHoBWW8_1HU5oDOh0_g/exec";
 
     async function fetchData() {
       try {
         const response = await fetch(url);
-        const text = await response.text();
-        const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1]);
-        const rows = json.table.rows;
+        const rows = await response.json(); // Apps Script returns a 2D array
 
-        const labels = rows.map(r => r.c[0]?.v || "Unknown"); // Thing Name
-        const monthly = rows.map(r => r.c[1]?.v || 0);
-        const weekly = rows.map(r => r.c[2]?.v || 0);
-        const daily = rows.map(r => r.c[3]?.v || 0);
+        // Skip header row
+        const labels = rows.slice(1).map(r => r[0] || "Unknown"); // Thing Name
+        const monthly = rows.slice(1).map(r => r[1] || 0);
+        const weekly = rows.slice(1).map(r => r[2] || 0);
+        const daily = rows.slice(1).map(r => r[3] || 0);
 
         // Remove previous chart if exists
         if(window.myChart) window.myChart.destroy();
@@ -64,13 +62,14 @@
             scales: { y: { beginAtZero: true } }
           }
         });
+
       } catch (error) {
-        console.error("Error fetching or parsing Google Sheet data:", error);
+        console.error("Error fetching data:", error);
       }
     }
 
     fetchData();
-    setInterval(fetchData, 30000); // refresh every 30 seconds
+    setInterval(fetchData, 30000); // Refresh chart every 30 seconds
   </script>
 </body>
 </html>
