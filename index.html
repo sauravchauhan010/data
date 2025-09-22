@@ -19,6 +19,9 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.2);
       padding: 20px;
     }
+    h2 {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -27,7 +30,7 @@
 
   <script>
     const SHEET_ID = "1gGm5MgseZynjf2GatevmJTh04cUOVeCg8WyYdjlznIQ";
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Untitled%20spreadsheet`;
 
     async function fetchData() {
       try {
@@ -36,8 +39,7 @@
         const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1]);
         const rows = json.table.rows;
 
-        // Extract data safely
-        const labels = rows.map(r => r.c[0]?.v || "Unknown");
+        const labels = rows.map(r => r.c[0]?.v || "Unknown"); // Thing Name
         const monthly = rows.map(r => r.c[1]?.v || 0);
         const weekly = rows.map(r => r.c[2]?.v || 0);
         const daily = rows.map(r => r.c[3]?.v || 0);
@@ -56,7 +58,11 @@
               { label: 'Daily Sell', data: daily, backgroundColor: 'rgba(75, 192, 192, 0.6)' }
             ]
           },
-          options: { responsive: true, scales: { y: { beginAtZero: true } } }
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true } }
+          }
         });
       } catch (error) {
         console.error("Error fetching or parsing Google Sheet data:", error);
@@ -64,7 +70,7 @@
     }
 
     fetchData();
-    setInterval(fetchData, 30000); // Refresh every 30 seconds
+    setInterval(fetchData, 30000); // refresh every 30 seconds
   </script>
 </body>
 </html>
